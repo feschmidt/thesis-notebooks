@@ -63,6 +63,9 @@ Qext = 2*np.pi*f0load*tlpars['Z0'] * \
     Cshunt*(Clumped+Cshunt)/Clumped
 print('Qext:', Qext)
 
+QcSal = np.pi/2*(tlpars['Z0']*2*np.pi*f0load*Cshunt)**2
+print('Qc (Sal):',QcSal)
+
 print('\n########### With kinetic inductance')
 Llumped = (tlpars['Lg'] + tlpars['Lk']) * length / 2
 print('Llumped (nH):', Llumped / 1e-9)
@@ -76,3 +79,6 @@ print('f0load (GHz):', f0load / 1e9)
 Qext = 2*np.pi*f0load*tlpars['Z0_kinetic'] * \
     Cshunt*(Clumped+Cshunt)/Clumped
 print('Qext:', Qext)
+
+QcSal = np.pi/2*(tlpars['Z0_kinetic']*2*np.pi*f0load*Cshunt)**2
+print('Qc (Sal):',QcSal)
