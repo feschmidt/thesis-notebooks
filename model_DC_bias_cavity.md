@@ -441,7 +441,7 @@ myfiles
 ### TL short
 
 ```python
-data = stlabutils.readdata.readQUCS(myfiles[0])
+data = stlabutils.readdata.readQUCS('qucs/thesis-TL_short.dat')
 ```
 
 ```python
@@ -475,6 +475,11 @@ s11 = data[0]['dep_S[1,1]']
 
 ```python
 s11=s11.reshape(len(alpha),len(freqs))
+Xfreqs,Yalphas=np.meshgrid(freqs,alpha)
+```
+
+```python
+plt.pcolormesh(Xfreqs/1e9,Yalphas,abs(s11))
 ```
 
 ```python
@@ -484,15 +489,6 @@ for z in s11:
     s11fit = stlabutils.S11func(freqs, params)
     fits.append(s11fit)
     pars.append(params)
-```
-
-```python
-Xfreqs,Yalphas=np.meshgrid(freqs,alpha)
-```
-
-```python
-plt.pcolormesh(Xfreqs/1e9,Yalphas,abs(s11))
-#plt.yscale('log')
 ```
 
 ```python
@@ -522,7 +518,15 @@ Xfreqs,Yrsg=np.meshgrid(freqs,Rsg)
 ```
 
 ```python
-np.any(1e-3==Rsg)
+plt.pcolormesh(Xfreqs/1e9,Yrsg,abs(s11),vmin=0.9,vmax=1)
+plt.yscale('log')
+plt.colorbar()
+```
+
+```python
+plt.pcolormesh(Xfreqs/1e9,Yrsg,signal.detrend(np.unwrap(np.angle(s11))),cmap='vlag',vmin=-0.01,vmax=0.01)
+plt.yscale('log')
+plt.colorbar()
 ```
 
 ```python
@@ -534,9 +538,11 @@ plt.legend()
 ```
 
 ```python
-plt.pcolormesh(Xfreqs/1e9,Yrsg,abs(s11),vmin=0.9,vmax=1)
-plt.yscale('log')
-plt.colorbar()
+for rr,zz in zip(Rsg[::20],s11[::20]):
+    plt.plot(freqs,signal.detrend(np.unwrap(np.angle(zz))),label=f"{rr:.0E}")
+
+#plt.ylim(0.9,1)
+plt.legend()
 ```
 
 ```python
@@ -588,7 +594,13 @@ Xfreqs,Ylj=np.meshgrid(freqs,LJ)
 ```
 
 ```python
-plt.pcolormesh(Xfreqs/1e9,Ylj,abs(s11))#,vmin=0.9,vmax=1)
+plt.pcolormesh(Xfreqs/1e9,Ylj,np.abs(s11))#,vmin=0.9,vmax=1)
+plt.yscale('log')
+plt.colorbar()
+```
+
+```python
+plt.pcolormesh(Xfreqs/1e9,Ylj,np.gradient(np.angle(s11))[0])#,vmin=0.9,vmax=1)
 plt.yscale('log')
 plt.colorbar()
 ```
