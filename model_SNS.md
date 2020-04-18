@@ -179,8 +179,11 @@ plt.close()
 ## Ej and Ic
 
 ```python
-def Ej(phi,tau):
-    return np.sqrt(1 - tau * np.sin(phi / 2)**2)
+def Ej(phi,tau,tau_c=1):
+    # tau_c: transparency at SN interface
+    # tau: transmission in the normal region
+    # phi: phase
+    return tau_c*np.sqrt(1 - tau * np.sin(phi / 2)**2)
     
 def Ic(phi,tau):
     return 1/2*tau*np.sin(phi)/Ej(phi,tau)
@@ -203,15 +206,21 @@ taus = [0.3,0.5,0.7,0.9]
 ```
 
 ```python
+tc=0.9
+```
+
+```python
 fig = plt.figure(figsize=cm2inch(17, 6), constrained_layout=True)
 gs = fig.add_gridspec(1, 3)
 
 ax1 = fig.add_subplot(gs[0, 0])
 for tau in taus:
-    plt.plot(phi/pi, Ej(phi, tau), 'C1', alpha=tau + .1)
-    plt.plot(phi/pi, -Ej(phi, tau), 'C0', alpha=tau + .1,label=tau)
-plt.plot(phi/pi, Ej(phi, 1), '--k', alpha=0.7)
-plt.plot(phi/pi, -Ej(phi, 1), '--k', alpha=0.7)
+    plt.plot(phi/pi, Ej(phi, tau,tc), 'C1', alpha=tau + .1)
+    plt.plot(phi/pi, -Ej(phi, tau,tc), 'C0', alpha=tau + .1,label=tau)
+#plt.plot(phi/pi, Ej(phi, 1), '--k', alpha=0.7)
+#plt.plot(phi/pi, -Ej(phi, 1), '--k', alpha=0.7)
+plt.axhline(1,c='k',ls='--',alpha=0.7)
+plt.axhline(-1,c='k',ls='--',alpha=0.7)
 plt.legend()
 
 ax2 = fig.add_subplot(gs[0, 1])
