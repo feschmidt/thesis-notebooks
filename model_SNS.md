@@ -206,7 +206,11 @@ taus = [0.3,0.5,0.7,0.9]
 ```
 
 ```python
-tc=0.9
+tc=1
+```
+
+```python
+dta=0
 ```
 
 ```python
@@ -215,8 +219,8 @@ gs = fig.add_gridspec(1, 3)
 
 ax1 = fig.add_subplot(gs[0, 0])
 for tau in taus:
-    plt.plot(phi/pi, Ej(phi, tau,tc), 'C1', alpha=tau + .1)
-    plt.plot(phi/pi, -Ej(phi, tau,tc), 'C0', alpha=tau + .1,label=tau)
+    plt.plot(phi/pi, Ej(phi, tau,tc), 'C1', alpha=tau + dta)
+    plt.plot(phi/pi, -Ej(phi, tau,tc), 'C0', alpha=tau + dta,label=tau)
 #plt.plot(phi/pi, Ej(phi, 1), '--k', alpha=0.7)
 #plt.plot(phi/pi, -Ej(phi, 1), '--k', alpha=0.7)
 plt.axhline(1,c='k',ls='--',alpha=0.7)
@@ -225,13 +229,13 @@ plt.legend()
 
 ax2 = fig.add_subplot(gs[0, 1])
 for tau in taus:
-    plt.plot(phi/pi, Ic(phi, tau), 'C0', alpha=tau + .1,label=tau)
+    plt.plot(phi/pi, Ic(phi, tau), 'C0', alpha=tau + dta,label=tau)
 plt.legend()
 
 ax3 = fig.add_subplot(gs[0, 2])
 for tau in taus:
     phi2 = np.linspace(0,phimax_of_I(tau)-0.01,len(phi))
-    plt.plot(phi2/phimax_of_I(tau), Lj(phi2, tau), 'C0', alpha=tau + .1,label=tau)
+    plt.plot(phi2/phimax_of_I(tau), Lj(phi2, tau), 'C0', alpha=tau + dta,label=tau)
 plt.legend()
 
 for theax in [ax1,ax2]:
@@ -246,8 +250,8 @@ ax3.set_ylim(0,20)
 ax3.set_xlabel(r'$\delta$ ($\delta_{\rm max}$)')
 
 ax1.text(-0.45, .95, "(a)", weight="bold", transform=ax1.transAxes)
-ax2.text(-0.5, .95, "(b)", weight="bold", transform=ax2.transAxes)
-ax3.text(-0.4, .95, "(c)", weight="bold", transform=ax3.transAxes)
+ax2.text(-0.45, .95, "(b)", weight="bold", transform=ax2.transAxes)
+ax3.text(-0.35, .95, "(c)", weight="bold", transform=ax3.transAxes)
 
 plt.savefig('plots/model_SNS_EjIc.pdf',bbox_to_inches='tight',dpi=dpi)
 plt.show()
