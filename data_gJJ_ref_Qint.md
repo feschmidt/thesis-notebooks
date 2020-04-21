@@ -214,6 +214,8 @@ ax11.set_yticklabels(['-$\pi$','-$\pi/2$','0','$\pi/2$','$\pi$'])
 ax1.text(-0.45, 1, '(a)', transform=ax1.transAxes, fontweight='bold', va='top')
 ax11.text(-0.5, 1, '(b)', transform=ax11.transAxes, fontweight='bold', va='top')
 axpol.text(-0.35, 1, '(c)', transform=axpol.transAxes, fontweight='bold', va='top')
+
+plt.savefig('plots/data_gJJ_ref_Qint.pdf',bbox_to_inches='tight',dpi=dpi)
     
 plt.show()
 plt.close()

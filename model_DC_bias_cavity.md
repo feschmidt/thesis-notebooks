@@ -484,7 +484,8 @@ plt.pcolormesh(Xfreqs/1e9,Yalphas,abs(s11))
 
 ```python
 fits,pars=[],[]
-for z in s11:
+for i,z in enumerate(s11):
+    print(f'############### {i+1}/{len(s11)}')
     params,_,_,_ = stlabutils.S11fit(freqs,z,ftype='A',doplots=False)
     s11fit = stlabutils.S11func(freqs, params)
     fits.append(s11fit)
@@ -498,6 +499,10 @@ plt.yscale('log')
 tt=5
 plt.axvline(alpha[tt],c='k')
 pars[tt]['Qext'],pars[tt]['Qint'],alpha[tt]
+```
+
+```python
+pickle.dump({'alpha':alpha,'pars':pars},open('qucs/thesis-TL_short_alphasweep.pkl','wb'))
 ```
 
 ### TL RSCJ, sweep Rsg
@@ -546,8 +551,9 @@ plt.legend()
 ```
 
 ```python
-fits,pars=[],[]
+fits, pars = [], []
 for i,z in enumerate(s11):
+    print(f'\n############### {i+1}/{len(s11)}\n')
     if i==0:
         params,_,_,_ = stlabutils.S11fit(freqs,z,ftype='A',doplots=False)
     else:
@@ -574,6 +580,10 @@ plt.yscale('log')
 ```python
 plt.plot(Rsg,[x['f0'] for x in pars])
 plt.xscale('log')
+```
+
+```python
+pickle.dump({'Rsg':Rsg,'pars':pars},open('qucs/thesis-TL_RCSJ_Rsgsweep.pkl','wb'))
 ```
 
 ### TL RSCJ, sweep LJ
@@ -626,6 +636,7 @@ plt.xscale('log')
 ```python
 fits,parsLj=[],[]
 for i,z in enumerate(s11):
+    print(f'\n############### {i+1}/{len(s11)}\n')
     if i==0:
         params,_,_,_ = stlabutils.S11fit(freqs,z,ftype='A',doplots=False)
     else:
@@ -654,7 +665,22 @@ plt.plot(LJ,[x['f0'] for x in parsLj])
 plt.xscale('log')
 ```
 
+```python
+pickle.dump({'LJ':LJ,'pars':parsLj,'f0s_Lj':f0s_Lj},open('qucs/thesis-TL_RCSJ_LJsweep.pkl','wb'))
+```
+
+# final plot
+
+
 ## RFmodel + Ljsweep + Rsgsweep
+
+```python
+LJsweep = pickle.load(open('qucs/thesis-TL_RCSJ_LJsweep.pkl','rb'))
+LJ,parsLj,f0s_Lj=LJsweep['LJ'],LJsweep['parsLj'],LJsweep['f0s_Lj']
+
+Rsgsweep = pickle.load(open('qucs/thesis-TL_RCSJ_Rsgsweep.pkl','rb'))
+Rsg,parsRsg=Rsgsweep['Rsg'],Rsgsweep['pars']
+```
 
 ```python
 rfmodel = plt.imread('plots/rfmodel.png')
@@ -678,8 +704,8 @@ plt.axis('off')
 
 ax2=fig.add_subplot(gs[1,0])
 plt.plot(Lj, f0_appr/1e9)
-#plt.plot(LJ,[x['f0'] for x in parsLj])
-#plt.plot(LJ,f0s_Lj/1e9)
+plt.plot(LJ,[x['f0'] for x in parsLj])
+plt.plot(LJ,f0s_Lj/1e9)
 plt.xscale('log')
 plt.xlabel(r'$L_J$ (H)')
 plt.ylabel(r'$f_0$ (GHz)')
@@ -696,6 +722,12 @@ plt.xscale('log')
 plt.gca().set_xticklabels([])
 
 plt.ylabel(r'$Q_i$ ($10^3$)')
+
+ax1.text(-0.45, 1, '(a)', transform=ax1.transAxes, fontweight='bold', va='top')
+ax2.text(-0.5, 1, '(b)', transform=ax2.transAxes, fontweight='bold', va='top')
+ax3.text(-0.35, 1, '(c)', transform=ax3.transAxes, fontweight='bold', va='top')
+ax4.text(-0.35, 1, '(d)', transform=ax4.transAxes, fontweight='bold', va='top')
+
 plt.savefig('plots/model_DC_bias_cavity_params_RCSJ.pdf',bbox_to_inches='tight',dpi=dpi)
 #plt.savefig('plots/model_DC_bias_cavity_params_RCSJ.png',bbox_to_inches='tight')
 plt.show()
