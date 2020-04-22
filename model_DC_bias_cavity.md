@@ -71,27 +71,27 @@ rfmodel = plt.imread('plots/rfmodel.png')
 ```
 
 ```python
-fig=plt.figure(figsize=cm2inch(17,6),constrained_layout=True)
-gs=fig.add_gridspec(1,2,width_ratios=[1.5,1])
-ax1=fig.add_subplot(gs[0,0])
+fig = plt.figure(figsize=cm2inch(17, 6), constrained_layout=True)
+gs = fig.add_gridspec(1, 2, width_ratios=[1.5, 1])
+ax1 = fig.add_subplot(gs[0, 0])
 plt.imshow(rfmodel)
 plt.axis('off')
-ax2=fig.add_subplot(gs[0,1])
-plt.plot(Lj, f0_appr/1e9, label='approximation')
+ax2 = fig.add_subplot(gs[0, 1])
+plt.plot(Lj, f0_appr / 1e9, label='approximation')
 plt.xscale('log')
 plt.xlabel(r'$L_J$ (H)')
 plt.ylabel(r'$f_0$ (GHz)')
-plt.savefig('plots/model_DC_bias_cavity_params.pdf',bbox_to_inches='tight')
+plt.savefig('plots/model_DC_bias_cavity_params.pdf', bbox_to_inches='tight')
 plt.show()
 plt.close()
 ```
 
 ```python
-np.exp(2*0.006073*6119e-6)
+np.exp(2 * 0.006073 * 6119e-6)
 ```
 
 ```python
-np.log10(Phi0/2/pi/1e-9)
+np.log10(Phi0 / 2 / pi / 1e-9)
 ```
 
 ## S11
@@ -173,14 +173,16 @@ axpol.set_ylabel(r'$\mathcal{Im}\ S_{11}$')
 ### inset
 axins = ax1.inset_axes([0.55, 0.05, 0.4, 0.3])
 axins.plot((w) / w0,
-         20 * np.log10(np.abs(S11(ki, ki, w0, w))),
-         label='$\kappa_e=\kappa_i$')
+           20 * np.log10(np.abs(S11(ki, ki, w0, w))),
+           label='$\kappa_e=\kappa_i$')
 axins.plot((w) / w0,
-         20 * np.log10(np.abs(S11(ki, ki / 10, w0, w))),'C1',
-         label='$\kappa_e=0.1\kappa_i$')
+           20 * np.log10(np.abs(S11(ki, ki / 10, w0, w))),
+           'C1',
+           label='$\kappa_e=0.1\kappa_i$')
 axins.plot((w) / w0,
-         20 * np.log10(np.abs(S11(ki, ki * 10, w0, w))),'C2',
-         label='$\kappa_e=10\kappa_i$')
+           20 * np.log10(np.abs(S11(ki, ki * 10, w0, w))),
+           'C2',
+           label='$\kappa_e=10\kappa_i$')
 # sub region of the original image
 x1, x2, y1, y2 = 0.9999, 1.0001, -2, -1
 axins.set_xlim(x1, x2)
@@ -189,7 +191,7 @@ axins.set_xticks([])
 axins.set_yticks([])
 
 ax1.indicate_inset_zoom(axins)
-plt.savefig('plots/model_DC_bias_cavity_coupling.pdf',bbox_to_inches='tight')
+plt.savefig('plots/model_DC_bias_cavity_coupling.pdf', bbox_to_inches='tight')
 plt.show()
 plt.close()
 ```
@@ -219,7 +221,7 @@ plt.plot((w) / w0,
          np.angle(S11(ki, ki * 10, w0, w)) / pi,
          label='$\kappa_e=10\kappa_i$')
 
-axpol = fig.add_subplot(gs[0, 2],projection='polar')
+axpol = fig.add_subplot(gs[0, 2], projection='polar')
 plt.plot(np.angle(S11(ki, ki, w0, w)),
          np.abs(S11(ki, ki, w0, w)),
          label='$\kappa_e=\kappa_i$')
@@ -332,7 +334,7 @@ plt.plot((w) / w0,
 ```
 
 ```python
-min(np.abs(S11(ki, ki / 5, w0, w))),min(np.abs(S11(ki, ki * 5, w0, w)))
+min(np.abs(S11(ki, ki / 5, w0, w))), min(np.abs(S11(ki, ki * 5, w0, w)))
 ```
 
 ```python
@@ -450,15 +452,21 @@ s11 = data[0]['dep_S[1,1]']
 ```
 
 ```python
-params,_,_,_ = stlabutils.S11fit(freqs,s11,ftype='A',doplots=True)
+params, _, _, _ = stlabutils.S11fit(freqs, s11, ftype='A', doplots=True)
 s11fit = stlabutils.S11func(freqs, params)
 params
 ```
 
 ```python
-plt.plot(freqs,np.abs(s11),'o')
-plt.plot(freqs,np.abs(s11fit))
-params['f0']/params['Qint']
+plt.plot(freqs, np.abs(s11), 'o')
+plt.plot(freqs, np.abs(s11fit))
+params['f0'] / params['Qint']
+```
+
+```python
+pickle.dump({
+    'params': params
+}, open('qucs/thesis-TL_short.pkl', 'wb'))
 ```
 
 ### TL short, sweep alpha
@@ -474,35 +482,43 @@ s11 = data[0]['dep_S[1,1]']
 ```
 
 ```python
-s11=s11.reshape(len(alpha),len(freqs))
-Xfreqs,Yalphas=np.meshgrid(freqs,alpha)
+s11 = s11.reshape(len(alpha), len(freqs))
+Xfreqs, Yalphas = np.meshgrid(freqs, alpha)
 ```
 
 ```python
-plt.pcolormesh(Xfreqs/1e9,Yalphas,abs(s11))
+plt.pcolormesh(Xfreqs / 1e9, Yalphas, abs(s11))
 ```
 
 ```python
-fits,pars=[],[]
-for i,z in enumerate(s11):
+fits, pars = [], []
+for i, z in enumerate(s11):
     print(f'############### {i+1}/{len(s11)}')
-    params,_,_,_ = stlabutils.S11fit(freqs,z,ftype='A',doplots=False)
+    params, _, _, _ = stlabutils.S11fit(freqs, z, ftype='A', doplots=False)
     s11fit = stlabutils.S11func(freqs, params)
     fits.append(s11fit)
     pars.append(params)
 ```
 
 ```python
-plt.plot(alpha[1:],[x['Qint'] for x in pars[1:]],'o')
-plt.plot(alpha[1:],[x['Qext'] for x in pars[1:]],'o')
+plt.plot(alpha[1:], [x['Qint'] for x in pars[1:]], 'o',label='Qi')
+plt.plot(alpha[1:], [x['Qext'] for x in pars[1:]], 'o',label='Qe')
 plt.yscale('log')
-tt=5
-plt.axvline(alpha[tt],c='k')
-pars[tt]['Qext'],pars[tt]['Qint'],alpha[tt]
+plt.legend()
+tt = 5
+plt.axvline(alpha[tt], c='k')
+pars[tt]['Qext'], pars[tt]['Qint'], alpha[tt]
 ```
 
 ```python
-pickle.dump({'alpha':alpha,'pars':pars},open('qucs/thesis-TL_short_alphasweep.pkl','wb'))
+plt.plot(alpha, [x['f0'] for x in pars], 'o')
+```
+
+```python
+pickle.dump({
+    'alpha': alpha,
+    'pars': pars
+}, open('qucs/thesis-TL_short_alphasweep.pkl', 'wb'))
 ```
 
 ### TL RSCJ, sweep Rsg
@@ -518,33 +534,38 @@ s11 = data[0]['dep_S[1,1]']
 ```
 
 ```python
-s11=s11.reshape(len(Rsg),len(freqs))
-Xfreqs,Yrsg=np.meshgrid(freqs,Rsg)
+s11 = s11.reshape(len(Rsg), len(freqs))
+Xfreqs, Yrsg = np.meshgrid(freqs, Rsg)
 ```
 
 ```python
-plt.pcolormesh(Xfreqs/1e9,Yrsg,abs(s11),vmin=0.9,vmax=1)
+plt.pcolormesh(Xfreqs / 1e9, Yrsg, abs(s11), vmin=0.9, vmax=1)
 plt.yscale('log')
 plt.colorbar()
 ```
 
 ```python
-plt.pcolormesh(Xfreqs/1e9,Yrsg,signal.detrend(np.unwrap(np.angle(s11))),cmap='vlag',vmin=-0.01,vmax=0.01)
+plt.pcolormesh(Xfreqs / 1e9,
+               Yrsg,
+               signal.detrend(np.unwrap(np.angle(s11))),
+               cmap='vlag',
+               vmin=-0.01,
+               vmax=0.01)
 plt.yscale('log')
 plt.colorbar()
 ```
 
 ```python
-for rr,zz in zip(Rsg[::20],s11[::20]):
-    plt.plot(freqs,abs(zz),label=f"{rr:.0E}")
+for rr, zz in zip(Rsg[::20], s11[::20]):
+    plt.plot(freqs, abs(zz), label=f"{rr:.0E}")
 
-plt.ylim(0.9,1)
+plt.ylim(0.9, 1)
 plt.legend()
 ```
 
 ```python
-for rr,zz in zip(Rsg[::20],s11[::20]):
-    plt.plot(freqs,signal.detrend(np.unwrap(np.angle(zz))),label=f"{rr:.0E}")
+for rr, zz in zip(Rsg[::20], s11[::20]):
+    plt.plot(freqs, signal.detrend(np.unwrap(np.angle(zz))), label=f"{rr:.0E}")
 
 #plt.ylim(0.9,1)
 plt.legend()
@@ -552,38 +573,46 @@ plt.legend()
 
 ```python
 fits, pars = [], []
-for i,z in enumerate(s11):
+for i, z in enumerate(s11):
     print(f'\n############### {i+1}/{len(s11)}\n')
-    if i==0:
-        params,_,_,_ = stlabutils.S11fit(freqs,z,ftype='A',doplots=False)
+    if i == 0:
+        params, _, _, _ = stlabutils.S11fit(freqs, z, ftype='A', doplots=False)
     else:
-        params,_,_,_ = stlabutils.S11fit(freqs,z,ftype='A',doplots=False,reusefitpars=True,oldpars=params)
+        params, _, _, _ = stlabutils.S11fit(freqs,
+                                            z,
+                                            ftype='A',
+                                            doplots=False,
+                                            reusefitpars=True,
+                                            oldpars=params)
     s11fit = stlabutils.S11func(freqs, params)
     fits.append(s11fit)
     pars.append(params)
 ```
 
 ```python
-plt.plot(Rsg,[x['Qint'] for x in pars])
-plt.plot(Rsg,[x['Qext'] for x in pars])
+plt.plot(Rsg, [x['Qint'] for x in pars])
+plt.plot(Rsg, [x['Qext'] for x in pars])
 plt.yscale('log')
 plt.xscale('log')
 ```
 
 ```python
-plt.plot(Rsg,[x['f0']/x['Qint'] for x in pars])
-plt.plot(Rsg,[x['f0']/x['Qext'] for x in pars])
+plt.plot(Rsg, [x['f0'] / x['Qint'] for x in pars])
+plt.plot(Rsg, [x['f0'] / x['Qext'] for x in pars])
 plt.xscale('log')
 plt.yscale('log')
 ```
 
 ```python
-plt.plot(Rsg,[x['f0'] for x in pars])
+plt.plot(Rsg, [x['f0'] for x in pars])
 plt.xscale('log')
 ```
 
 ```python
-pickle.dump({'Rsg':Rsg,'pars':pars},open('qucs/thesis-TL_RCSJ_Rsgsweep.pkl','wb'))
+pickle.dump({
+    'Rsg': Rsg,
+    'pars': pars
+}, open('qucs/thesis-TL_RCSJ_Rsgsweep.pkl', 'wb'))
 ```
 
 ### TL RSCJ, sweep LJ
@@ -594,79 +623,92 @@ data = stlabutils.readdata.readQUCS('qucs/thesis-TL_RCSJ_LJsweep.dat')
 
 ```python
 freqs = data[0]['indep_frequency']
-LJ = Phi0/2/pi/data[0]['indep_Ic']
+#LJ = Phi0 / 2 / pi / data[0]['indep_Ic']
+LJ = data[0]['indep_JJL']
 s11 = data[0]['dep_S[1,1]']
 ```
 
 ```python
-s11=s11.reshape(len(LJ),len(freqs))
-Xfreqs,Ylj=np.meshgrid(freqs,LJ)
+s11 = s11.reshape(len(LJ), len(freqs))
+Xfreqs, Ylj = np.meshgrid(freqs, LJ)
 ```
 
 ```python
-plt.pcolormesh(Xfreqs/1e9,Ylj,np.abs(s11))#,vmin=0.9,vmax=1)
+plt.pcolormesh(Xfreqs / 1e9, Ylj, np.abs(s11))  #,vmin=0.9,vmax=1)
 plt.yscale('log')
 plt.colorbar()
 ```
 
 ```python
-plt.pcolormesh(Xfreqs/1e9,Ylj,np.gradient(np.angle(s11))[0])#,vmin=0.9,vmax=1)
+plt.pcolormesh(Xfreqs / 1e9, Ylj,
+               np.gradient(np.angle(s11))[0],cmap='vlag')  #,vmin=0.9,vmax=1)
 plt.yscale('log')
 plt.colorbar()
+plt.show()
+plt.close()
 ```
 
 ```python
-plt.plot(freqs/1e9,abs(s11[0]),'o')
-plt.xlim(3.665,3.685)
+plt.plot(freqs / 1e9, abs(s11[0]), 'o')
+plt.xlim(7.315,7.323)
 ```
 
 ```python
 f0s_Lj = []
-for i,z in enumerate(s11):
+for i, z in enumerate(s11):
     idx = np.argmin(abs(z))
     f0s_Lj.append(freqs[idx])
-f0s_Lj=np.array(f0s_Lj)
+f0s_Lj = np.array(f0s_Lj)
 ```
 
 ```python
-plt.plot(LJ,f0s_Lj)
+plt.plot(LJ, f0s_Lj)
 plt.xscale('log')
 ```
 
 ```python
-fits,parsLj=[],[]
-for i,z in enumerate(s11):
+fits, parsLj = [], []
+for i, z in enumerate(s11):
     print(f'\n############### {i+1}/{len(s11)}\n')
-    if i==0:
-        params,_,_,_ = stlabutils.S11fit(freqs,z,ftype='A',doplots=False)
+    if i == 0:
+        params, _, _, _ = stlabutils.S11fit(freqs, z, ftype='A', doplots=False)
     else:
-        params,_,_,_ = stlabutils.S11fit(freqs,z,ftype='A',doplots=False,reusefitpars=True,oldpars=params)
+        params, _, _, _ = stlabutils.S11fit(freqs,
+                                            z,
+                                            ftype='A',
+                                            doplots=False,
+                                            reusefitpars=True,
+                                            oldpars=params)
     s11fit = stlabutils.S11func(freqs, params)
     fits.append(s11fit)
     parsLj.append(params)
 ```
 
 ```python
-plt.plot(LJ,[x['Qint'] for x in parsLj])
-plt.plot(LJ,[x['Qext'] for x in parsLj])
+plt.plot(LJ, [x['Qint'] for x in parsLj])
+plt.plot(LJ, [x['Qext'] for x in parsLj])
 plt.yscale('log')
 plt.xscale('log')
 ```
 
 ```python
-plt.plot(LJ,[x['f0']/x['Qint'] for x in parsLj])
-plt.plot(LJ,[x['f0']/x['Qext'] for x in parsLj])
+plt.plot(LJ, [x['f0'] / x['Qint'] for x in parsLj])
+plt.plot(LJ, [x['f0'] / x['Qext'] for x in parsLj])
 plt.xscale('log')
 plt.yscale('log')
 ```
 
 ```python
-plt.plot(LJ,[x['f0'] for x in parsLj])
+plt.plot(LJ, [x['f0'] for x in parsLj])
 plt.xscale('log')
 ```
 
 ```python
-pickle.dump({'LJ':LJ,'pars':parsLj,'f0s_Lj':f0s_Lj},open('qucs/thesis-TL_RCSJ_LJsweep.pkl','wb'))
+pickle.dump({
+    'LJ': LJ,
+    'pars': parsLj,
+    'f0s_Lj': f0s_Lj
+}, open('qucs/thesis-TL_RCSJ_LJsweep.pkl', 'wb'))
 ```
 
 # final plot
@@ -675,11 +717,22 @@ pickle.dump({'LJ':LJ,'pars':parsLj,'f0s_Lj':f0s_Lj},open('qucs/thesis-TL_RCSJ_LJ
 ## RFmodel + Ljsweep + Rsgsweep
 
 ```python
-LJsweep = pickle.load(open('qucs/thesis-TL_RCSJ_LJsweep.pkl','rb'))
-LJ,parsLj,f0s_Lj=LJsweep['LJ'],LJsweep['parsLj'],LJsweep['f0s_Lj']
+LJsweep = pickle.load(open('qucs/thesis-TL_RCSJ_LJsweep.pkl', 'rb'))
+LJ, parsLj, f0s_Lj = LJsweep['LJ'], LJsweep['pars'], LJsweep['f0s_Lj']
 
-Rsgsweep = pickle.load(open('qucs/thesis-TL_RCSJ_Rsgsweep.pkl','rb'))
-Rsg,parsRsg=Rsgsweep['Rsg'],Rsgsweep['pars']
+Rsgsweep = pickle.load(open('qucs/thesis-TL_RCSJ_Rsgsweep.pkl', 'rb'))
+Rsg, parsRsg = Rsgsweep['Rsg'], Rsgsweep['pars']
+```
+
+```python
+paramsshort = pickle.load(open('qucs/thesis-TL_short.pkl', 'rb'))
+fr = paramsshort['params']['f0']
+```
+
+```python
+Lj = np.logspace(-12, -6.5, 401)
+Lr = 3e-9
+f0_appr = fr / 2 * (1 + 1 / (1 + Lj / (Lr / 2)))
 ```
 
 ```python
@@ -687,48 +740,41 @@ rfmodel = plt.imread('plots/rfmodel.png')
 ```
 
 ```python
-Lj = np.logspace(-12, -6.5, 401)
-fr = max([x['f0']/1e9 for x in pars])*1e9
-Lr = 3e-9
-Cs = 30e-12
-f0_appr = fr / 2 * (1 + 1 / (1 + Lj / (Lr / 2)))
-```
+fig = plt.figure(figsize=cm2inch(17, 8), constrained_layout=True)
+gs = fig.add_gridspec(2, 2)  #,width_ratios=[1.5,1])
 
-```python
-fig=plt.figure(figsize=cm2inch(17,8),constrained_layout=True)
-gs=fig.add_gridspec(2,2)#,width_ratios=[1.5,1])
-
-ax1=fig.add_subplot(gs[0,0])
+ax1 = fig.add_subplot(gs[0, 0])
 plt.imshow(rfmodel)
 plt.axis('off')
 
-ax2=fig.add_subplot(gs[1,0])
-plt.plot(Lj, f0_appr/1e9)
-plt.plot(LJ,[x['f0'] for x in parsLj])
-plt.plot(LJ,f0s_Lj/1e9)
+ax2 = fig.add_subplot(gs[1, 0])
+#plt.plot(LJ, np.array([x['f0'] for x in parsLj])/1e9)
+plt.plot(LJ, f0s_Lj / 1e9)
 plt.xscale('log')
 plt.xlabel(r'$L_J$ (H)')
 plt.ylabel(r'$f_0$ (GHz)')
 
-ax3=fig.add_subplot(gs[1,1])
-plt.plot(Rsg,[x['f0']/1e9 for x in pars])
+ax3 = fig.add_subplot(gs[1, 1])
+plt.plot(Rsg, [x['f0'] / 1e9 for x in parsRsg])
 plt.xscale('log')
 plt.xlabel(r'$R_{\rm sg}$ ($\Omega$)')
 plt.ylabel(r'$f_0$ (GHz)')
 
-ax4=fig.add_subplot(gs[0,1])
-plt.plot(Rsg,[x['Qint']/1e3 for x in pars])
+ax4 = fig.add_subplot(gs[0, 1])
+plt.plot(Rsg, [x['Qint'] / 1e3 for x in parsRsg])
 plt.xscale('log')
 plt.gca().set_xticklabels([])
 
 plt.ylabel(r'$Q_i$ ($10^3$)')
 
-ax1.text(-0.45, 1, '(a)', transform=ax1.transAxes, fontweight='bold', va='top')
-ax2.text(-0.5, 1, '(b)', transform=ax2.transAxes, fontweight='bold', va='top')
-ax3.text(-0.35, 1, '(c)', transform=ax3.transAxes, fontweight='bold', va='top')
-ax4.text(-0.35, 1, '(d)', transform=ax4.transAxes, fontweight='bold', va='top')
+ax1.text(-0.25, 1, '(a)', transform=ax1.transAxes, fontweight='bold', va='top')
+ax2.text(-0.16, 1, '(b)', transform=ax2.transAxes, fontweight='bold', va='top')
+ax3.text(-0.28, 1, '(c)', transform=ax3.transAxes, fontweight='bold', va='top')
+ax4.text(-0.28, 1, '(d)', transform=ax4.transAxes, fontweight='bold', va='top')
 
-plt.savefig('plots/model_DC_bias_cavity_params_RCSJ.pdf',bbox_to_inches='tight',dpi=dpi)
+plt.savefig('plots/model_DC_bias_cavity_params_RCSJ.pdf',
+            bbox_to_inches='tight',
+            dpi=dpi)
 #plt.savefig('plots/model_DC_bias_cavity_params_RCSJ.png',bbox_to_inches='tight')
 plt.show()
 plt.close()

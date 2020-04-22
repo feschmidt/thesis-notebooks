@@ -265,6 +265,37 @@ for tau in taus:
 plt.ylim(-10,10)
 ```
 
+# Andreev reflection
+
+Formulas taken from Joshua Island's PhD thesis
+
+```python
+def pAR(efull,d):
+    id1 = np.argwhere(np.abs(efull)>d)
+    e1=efull[id1]
+    part1 = e1-np.sign(e1)*np.sqrt(e1**2-d**2)
+    id2 = np.argwhere(np.abs(efull)<=d)
+    e2=efull[id2]
+    part2 = e2-1j*np.sqrt(d**2-e2**2)
+    energy = np.concatenate([e1,e2])
+    probability = np.concatenate([part1,part2])
+    list1, list2 = zip(*sorted(zip(energy, probability)))
+    return list2
+```
+
+```python
+pabs = np.abs(pAR(efull,d))
+pphase = np.unwrap(np.angle(pAR(efull,d)))
+```
+
+```python
+plt.plot(efull,pabs)
+```
+
+```python
+plt.plot(efull,pphase)
+```
+
 ```python
 
 ```
