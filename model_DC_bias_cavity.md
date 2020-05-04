@@ -116,7 +116,7 @@ print(f'External Q: {w0/ki:.0f}, {w0/(0.1*ki):.0f}, {w0/(10*ki):.0f}')
 
 ```python
 df = 10e6
-w = 2 * pi * np.linspace(f0 - df, f0 + df, 1001)
+w = 2 * pi * np.linspace(f0 - df, f0 + df, 801)
 ```
 
 ```python
@@ -124,14 +124,18 @@ fig = plt.figure(figsize=cm2inch(17, 6), constrained_layout=True)
 gs = fig.add_gridspec(1, 3, width_ratios=(1, 1, 1.5))
 ax1 = fig.add_subplot(gs[0, 0])
 plt.plot((w) / w0,
-         20 * np.log10(np.abs(S11(ki, ki, w0, w))),
+         #20 * np.log10(np.abs(S11(ki, ki, w0, w))),
+         np.abs(S11(ki, ki, w0, w)),
          label='$\kappa_e=\kappa_i$')
 plt.plot((w) / w0,
-         20 * np.log10(np.abs(S11(ki, ki / 10, w0, w))),
+         #20 * np.log10(np.abs(S11(ki, ki / 10, w0, w))),
+         np.abs(S11(ki, ki / 10, w0, w)),
          label='$\kappa_e=0.1\kappa_i$')
 plt.plot((w) / w0,
-         20 * np.log10(np.abs(S11(ki, ki * 10, w0, w))),
+         #20 * np.log10(np.abs(S11(ki, ki * 10, w0, w))),
+         np.abs(S11(ki, ki * 10, w0, w)),
          label='$\kappa_e=10\kappa_i$')
+#plt.ylim(-5,.4)
 
 ax11 = fig.add_subplot(gs[0, 1])
 plt.plot((w) / w0,
@@ -158,13 +162,15 @@ plt.gca().set_aspect('equal', 'box')
 plt.xlim(-1.1, 1.1)
 plt.ylim(-1.1, 1.1)
 plt.legend(loc=1)
+axpol.set_xticks([-1,-0.5,0,0.5,1])
+axpol.set_yticks([-1,-0.5,0,0.5,1])
 
 #for theax in [ax1,ax11]:
 #    theax.legend(loc=3)
 
 ax1.set_xlabel('$\delta\omega/\omega_0$')
 ax11.set_xlabel('$\delta\omega/\omega_0$')
-ax1.set_ylabel(r'$|S_{11}|$ (dB)')
+ax1.set_ylabel(r'$|S_{11}|$')
 ax11.set_ylabel(r'$\angle\ S_{11}$ ($\pi$)')
 
 axpol.set_xlabel(r'$\mathcal{Re}\ S_{11}$')
@@ -173,24 +179,32 @@ axpol.set_ylabel(r'$\mathcal{Im}\ S_{11}$')
 ### inset
 axins = ax1.inset_axes([0.55, 0.05, 0.4, 0.3])
 axins.plot((w) / w0,
-           20 * np.log10(np.abs(S11(ki, ki, w0, w))),
+           #20 * np.log10(np.abs(S11(ki, ki, w0, w))),
+           np.abs(S11(ki, ki, w0, w)),
            label='$\kappa_e=\kappa_i$')
 axins.plot((w) / w0,
-           20 * np.log10(np.abs(S11(ki, ki / 10, w0, w))),
+           #20 * np.log10(np.abs(S11(ki, ki / 10, w0, w))),
+           np.abs(S11(ki, ki / 10, w0, w)),
            'C1',
            label='$\kappa_e=0.1\kappa_i$')
 axins.plot((w) / w0,
-           20 * np.log10(np.abs(S11(ki, ki * 10, w0, w))),
+           #20 * np.log10(np.abs(S11(ki, ki * 10, w0, w))),
+           np.abs(S11(ki, ki * 10, w0, w)),
            'C2',
            label='$\kappa_e=10\kappa_i$')
 # sub region of the original image
-x1, x2, y1, y2 = 0.9999, 1.0001, -2, -1
+x1, x2, y1, y2 = 0.9999, 1.0001, 0.75, 1.05
 axins.set_xlim(x1, x2)
 axins.set_ylim(y1, y2)
 axins.set_xticks([])
 axins.set_yticks([])
 
 ax1.indicate_inset_zoom(axins)
+
+ax1.text(-0.5, 1, '(a)', transform=ax1.transAxes, fontweight='bold', va='top')
+ax11.text(-0.55, 1, '(b)', transform=ax11.transAxes, fontweight='bold', va='top')
+axpol.text(-0.35, 1, '(c)', transform=axpol.transAxes, fontweight='bold', va='top')
+
 plt.savefig('plots/model_DC_bias_cavity_coupling.pdf', bbox_to_inches='tight')
 plt.show()
 plt.close()
