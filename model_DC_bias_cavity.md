@@ -6,7 +6,7 @@ jupyter:
       extension: .md
       format_name: markdown
       format_version: '1.2'
-      jupytext_version: 1.4.1
+      jupytext_version: 1.4.2
   kernelspec:
     display_name: Python 3
     language: python
@@ -680,7 +680,7 @@ plt.plot(LJ, f0s_Lj)
 plt.xscale('log')
 ```
 
-```python
+<!-- #raw -->
 fits, parsLj = [], []
 for i, z in enumerate(s11):
     print(f'\n############### {i+1}/{len(s11)}\n')
@@ -696,7 +696,7 @@ for i, z in enumerate(s11):
     s11fit = stlabutils.S11func(freqs, params)
     fits.append(s11fit)
     parsLj.append(params)
-```
+<!-- #endraw -->
 
 ```python
 plt.plot(LJ, [x['Qint'] for x in parsLj])
@@ -720,7 +720,7 @@ plt.xscale('log')
 ```python
 pickle.dump({
     'LJ': LJ,
-    'pars': parsLj,
+    #'pars': parsLj,
     'f0s_Lj': f0s_Lj
 }, open('qucs/thesis-TL_RCSJ_LJsweep.pkl', 'wb'))
 ```
@@ -732,7 +732,8 @@ pickle.dump({
 
 ```python
 LJsweep = pickle.load(open('qucs/thesis-TL_RCSJ_LJsweep.pkl', 'rb'))
-LJ, parsLj, f0s_Lj = LJsweep['LJ'], LJsweep['pars'], LJsweep['f0s_Lj']
+#LJ, parsLj, f0s_Lj = LJsweep['LJ'], LJsweep['pars'], LJsweep['f0s_Lj']
+LJ, f0s_Lj = LJsweep['LJ'], LJsweep['f0s_Lj']
 
 Rsgsweep = pickle.load(open('qucs/thesis-TL_RCSJ_Rsgsweep.pkl', 'rb'))
 Rsg, parsRsg = Rsgsweep['Rsg'], Rsgsweep['pars']
@@ -740,12 +741,12 @@ Rsg, parsRsg = Rsgsweep['Rsg'], Rsgsweep['pars']
 
 ```python
 paramsshort = pickle.load(open('qucs/thesis-TL_short.pkl', 'rb'))
-fr = paramsshort['params']['f0']
+fr = paramsshort['params']['f0'].value
 ```
 
 ```python
 Lj = np.logspace(-12, -6.5, 401)
-Lr = 3e-9
+Lr = 2.5e-9
 f0_appr = fr / 2 * (1 + 1 / (1 + Lj / (Lr / 2)))
 ```
 
@@ -762,7 +763,6 @@ plt.imshow(rfmodel)
 plt.axis('off')
 
 ax2 = fig.add_subplot(gs[1, 0])
-#plt.plot(LJ, np.array([x['f0'] for x in parsLj])/1e9)
 plt.plot(LJ, f0s_Lj / 1e9)
 plt.xscale('log')
 plt.xlabel(r'$L_J$ (H)')
@@ -783,8 +783,8 @@ plt.ylabel(r'$Q_i$ ($10^3$)')
 
 ax1.text(-0.25, 1, '(a)', transform=ax1.transAxes, fontweight='bold', va='top')
 ax2.text(-0.16, 1, '(b)', transform=ax2.transAxes, fontweight='bold', va='top')
-ax3.text(-0.28, 1, '(c)', transform=ax3.transAxes, fontweight='bold', va='top')
-ax4.text(-0.28, 1, '(d)', transform=ax4.transAxes, fontweight='bold', va='top')
+ax4.text(-0.28, 1, '(c)', transform=ax4.transAxes, fontweight='bold', va='top')
+ax3.text(-0.28, 1, '(d)', transform=ax3.transAxes, fontweight='bold', va='top')
 
 plt.savefig('plots/model_DC_bias_cavity_params_RCSJ.pdf',
             bbox_to_inches='tight',
@@ -792,6 +792,73 @@ plt.savefig('plots/model_DC_bias_cavity_params_RCSJ.pdf',
 #plt.savefig('plots/model_DC_bias_cavity_params_RCSJ.png',bbox_to_inches='tight')
 plt.show()
 plt.close()
+```
+
+## fit linspace
+
+```python
+xx,yy = LJ,f0s_Lj
+
+mymodel = lmfit.Model(f0model,independent_vars=['Ic'])
+
+mypars = mymodel.make_params()
+mypars
+```
+
+```python
+mymodel.set_param_hint('fr',value=fr)#,vary=False)
+mymodel.set_param_hint('Lr',value=3e-9)
+mymodel.set_param_hint('I',value=0,vary=False)
+mymodel.set_param_hint('nJJ',vary=False)
+result = mymodel.fit(yy,Ic=Phi0/2/pi/xx)
+result.plot()
+```
+
+```python
+result.params
+```
+
+```python
+plt.plot(xx,yy,'o')
+plt.plot(xx,result.best_fit)
+plt.xscale('log')
+```
+
+## fit logspace
+
+```python
+def f0model_log(I, fr, Lr, Ic, nJJ=1):
+    Ic = 10**Ic
+    # each JJ shifts the resonance frequency further downwards
+    return fr / 2 * (1 + 1 / (1 + nJJ * Ljmodel(I, Ic) / (Lr / 2)))
+```
+
+```python
+xx,yy = LJ,f0s_Lj
+
+mymodel = lmfit.Model(f0model_log,independent_vars=['Ic'])
+
+mypars = mymodel.make_params()
+mypars
+```
+
+```python
+mymodel.set_param_hint('fr',value=fr)#,vary=False)
+mymodel.set_param_hint('Lr',value=3e-9)
+mymodel.set_param_hint('I',value=0,vary=False)
+mymodel.set_param_hint('nJJ',vary=False)
+result = mymodel.fit(yy,Ic=np.log10(Phi0/2/pi/xx))
+result.plot()
+```
+
+```python
+result.params
+```
+
+```python
+plt.plot(xx,yy,'o')
+plt.plot(xx,result.best_fit)
+plt.xscale('log')
 ```
 
 ```python

@@ -6,7 +6,7 @@ jupyter:
       extension: .md
       format_name: markdown
       format_version: '1.2'
-      jupytext_version: 1.4.1
+      jupytext_version: 1.4.2
   kernelspec:
     display_name: Python 3
     language: python
@@ -186,15 +186,23 @@ def Ej(phi,tau,tau_c=1):
     return tau_c*np.sqrt(1 - tau * np.sin(phi / 2)**2)
     
 def Ic(phi,tau):
-    return 1/2*tau*np.sin(phi)/Ej(phi,tau)
+    if tau==0:
+        return np.sin(phi)
+    else:
+        return 1/2*tau*np.sin(phi)/Ej(phi,tau)
 
 def Lj(phi,tau):
     return 2*Ej(phi,tau)**3/(tau*np.cos(phi)*Ej(phi,tau)**2+1/4*tau**2*np.sin(phi)**2)
 
 def phimax_of_I(tau):
-    phi=np.linspace(0,2*pi,10001)
-    Ij = Ic(phi,tau)
-    return phi[np.argmax(Ij)]
+    if tau==0:
+        return pi/2
+    elif tau==1:
+        return pi
+    else:
+        phi=np.linspace(0,2*pi,10001)
+        Ij = Ic(phi,tau)
+        return phi[np.argmax(Ij)]
 ```
 
 ```python
@@ -263,6 +271,123 @@ for tau in taus:
     plt.plot(1/np.gradient(Ic(phi,tau),phi))
     plt.plot(Lj(phi,tau),'--')
 plt.ylim(-10,10)
+```
+
+```python
+np.nanmax(Ic(phip, tau))
+```
+
+```python
+from src.model import CPRskew
+```
+
+```python
+def Lj_norm(phi,tau):
+    return 1 / np.gradient(Ic(phi, tau) / np.nanmax(Ic(phi, tau)))
+```
+
+```python
+fig = plt.figure(figsize=cm2inch(17, 10), constrained_layout=True)
+gs = fig.add_gridspec(2, 3)
+
+ax1 = fig.add_subplot(gs[:, 0])
+for tau in taus:
+    plt.plot(phi / pi, Ej(phi, tau, tc), 'C1', alpha=tau + dta)
+    plt.plot(phi / pi, -Ej(phi, tau, tc), 'C0', alpha=tau + dta, label=tau)
+#plt.plot(phi/pi, Ej(phi, 1), '--k', alpha=0.7)
+#plt.plot(phi/pi, -Ej(phi, 1), '--k', alpha=0.7)
+plt.axhline(1, c='k', ls='--', alpha=0.7)
+plt.axhline(-1, c='k', ls='--', alpha=0.7)
+plt.legend()
+
+ax2 = fig.add_subplot(gs[0, 1])
+for tau in taus:
+    plt.plot(phi / pi, Ic(phi, tau), 'C0', alpha=tau + dta, label=tau)
+plt.legend()
+
+ax3 = fig.add_subplot(gs[0, 2])
+for tau in taus:
+    phi2 = np.linspace(0, phimax_of_I(tau) - 0.01, len(phi))
+    plt.plot(phi2 / pi,#phimax_of_I(tau),
+             Lj(phi2, tau),
+             'C0',
+             alpha=tau + dta,
+             label=tau)
+plt.legend()
+
+"""taus2 = np.linspace(0, 1, 101)
+phip = np.linspace(0, pi, 101)
+skews2 = []
+Lj_at_zero =[]
+Lj_at_max=[]
+sisLj = 2 / np.gradient(np.sin(phip))
+
+for tau in taus2:
+    skews2.append(CPRskew(tau))
+    phi2 = np.linspace(0, phimax_of_I(tau) , len(phip))
+    theLj = 1 / np.gradient(Ic(phi2, tau) / np.nanmax(Ic(phi2, tau)))
+    Lj_at_zero.append(theLj[0]/sisLj[0])
+    Lj_at_max.append(theLj[-1])
+
+dta2=.1"""
+
+
+taus2 = [0.4,0.7,0.9,1.0]
+
+ax4 = fig.add_subplot(gs[1, 1])
+#plt.plot(taus2,skews2,'C0')
+#plt.xlabel(r'$\tau$')
+#plt.ylabel(r'$S$')
+phip=np.linspace(0,pi,101)
+for tau in taus2:
+    plt.plot(phip/pi,Ic(phip, tau) / np.nanmax(np.ma.masked_invalid(Ic(phip, tau))),'C0',alpha=tau + dta,label=tau)
+plt.plot(phip/pi,Ic(phip,0),c='k',ls='--')
+plt.legend()
+plt.xlabel(r'$\delta$ ($\pi$)')
+plt.ylabel(r'$I_J$ (norm.)')
+
+ax5 = fig.add_subplot(gs[1, 2])
+phip=np.linspace(0,.5*pi,101)
+for tau in taus2:
+    #plt.plot(phip,Lj_norm(phip, tau),label=tau)
+    plt.plot(phip/pi,Lj_norm(phip, tau)/Lj_norm(phip, 0),'C0',alpha=tau + dta,label=tau)
+plt.axhline(1,c='k',ls='--')
+plt.legend()
+plt.xlabel(r'$\delta$ ($\pi$)')
+plt.ylabel(r'$L_J$ / $L_J(\tau=0)$')
+
+for theax in [ax1, ax2]:
+    theax.set_xlabel(r'$\delta$ ($\pi$)')
+
+ax1.set_ylabel(r'$U_J$ $(\Delta)$')
+
+ax2.set_ylabel(r'$I_J$ $(\frac{e\Delta}{\hbar})$')
+
+ax3.set_ylabel(r'$L_J$ $(\frac{4\hbar^2}{e^2\Delta})$')
+ax3.set_ylim(0, 20)
+#ax3.set_xlabel(r'$\delta$ ($\delta_{\rm max}$)')
+ax3.set_xlabel(r'$\delta$ ($\pi$)')
+
+ax1.text(-0.45, .95, "(a)", weight="bold", transform=ax1.transAxes)
+ax2.text(-0.45, .95, "(b)", weight="bold", transform=ax2.transAxes)
+ax3.text(-0.35, .95, "(c)", weight="bold", transform=ax3.transAxes)
+ax4.text(-0.45, .95, "(d)", weight="bold", transform=ax4.transAxes)
+ax5.text(-0.35, .95, "(e)", weight="bold", transform=ax5.transAxes)
+
+plt.savefig('plots/model_SNS_EjIc_full.pdf',bbox_to_inches='tight',dpi=dpi)
+plt.show()
+plt.close()
+```
+
+```python
+phip=np.linspace(0,.5*pi,101)
+for tau in taus:
+    #plt.plot(phip,Lj_norm(phip, tau),label=tau)
+    plt.plot(phip/pi,Lj_norm(phip, tau)/Lj_norm(phip, 0),'C0',alpha=tau + dta,label=tau)
+plt.axhline(1,c='k',ls='--')
+plt.legend()
+#plt.ylim(25,50)
+#plt.xlim(0,0.5)
 ```
 
 # Andreev reflection
